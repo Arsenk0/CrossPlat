@@ -1,16 +1,12 @@
 package ua.logistics.gateway.resource;
 
-import ua.logistics.gateway.client.ShipmentsClient;
-import ua.logistics.gateway.client.FleetClient;
-import ua.logistics.gateway.client.BillingClient;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import ua.logistics.gateway.client.*;
 
 @Path("/api")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class GatewayResource {
 
     @Inject
@@ -25,84 +21,36 @@ public class GatewayResource {
     @RestClient
     BillingClient billingClient;
 
-    // Shipments endpoints
+    // --- SHIPMENTS ---
     @GET
     @Path("/shipments")
-    public String getAllShipments() {
-        return shipmentsClient.getAllShipments();
-    }
-
-    @GET
-    @Path("/shipments/{id}")
-    public String getShipment(@PathParam("id") Long id) {
-        return shipmentsClient.getShipment(id);
+    public Response getShipments() {
+        return Response.ok(shipmentsClient.getAllShipments()).build();
     }
 
     @POST
     @Path("/shipments")
-    public String createShipment(String shipment) {
-        return shipmentsClient.createShipment(shipment);
+    public Response createShipment(Object shipment) {
+        return Response.ok(shipmentsClient.createShipment(shipment)).build();
     }
 
     @PUT
     @Path("/shipments/{id}/assign-vehicle")
-    public String assignVehicle(@PathParam("id") Long id) {
-        return shipmentsClient.assignVehicle(id);
+    public Response assignVehicle(@PathParam("id") Long id) {
+        return Response.ok(shipmentsClient.assignVehicle(id)).build();
     }
 
-    // Fleet endpoints
+    // --- FLEET ---
     @GET
     @Path("/vehicles")
-    public String getAllVehicles() {
-        return fleetClient.getAllVehicles();
+    public Response getVehicles() {
+        return Response.ok(fleetClient.getAllVehicles()).build();
     }
 
-    @GET
-    @Path("/vehicles/{id}")
-    public String getVehicle(@PathParam("id") Long id) {
-        return fleetClient.getVehicle(id);
-    }
-
-    @GET
-    @Path("/drivers")
-    public String getAllDrivers() {
-        return fleetClient.getAllDrivers();
-    }
-
-    // Billing endpoints
-    @GET
-    @Path("/invoices")
-    public String getAllInvoices() {
-        return billingClient.getAllInvoices();
-    }
-
-    @GET
-    @Path("/invoices/{id}")
-    public String getInvoice(@PathParam("id") Long id) {
-        return billingClient.getInvoice(id);
-    }
-
+    // --- BILLING ---
     @POST
-    @Path("/invoices/create-for-shipment/{shipmentId}")
-    public String createInvoice(@PathParam("shipmentId") Long shipmentId) {
-        return billingClient.createInvoice(shipmentId);
-    }
-
-    // Агрегований endpoint - повна інформація про доставку
-    @GET
-    @Path("/delivery-info/{shipmentId}")
-    public String getDeliveryInfo(@PathParam("shipmentId") Long shipmentId) {
-        try {
-            String shipment = shipmentsClient.getShipment(shipmentId);
-            String invoice = billingClient.getInvoice(shipmentId);
-
-            return String.format(
-                    "{\"shipment\": %s, \"invoice\": %s}",
-                    shipment,
-                    invoice
-            );
-        } catch (Exception e) {
-            return "{\"error\": \"" + e.getMessage() + "\"}";
-        }
+    @Path("/invoices/create-for-shipment/{id}")
+    public Response createInvoice(@PathParam("id") Long id) {
+        return Response.ok(billingClient.createInvoice(id)).build();
     }
 }

@@ -1,26 +1,30 @@
 package ua.logistics.gateway.client;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/api/shipments")
 @RegisterRestClient(configKey="shipments-api")
 public interface ShipmentsClient {
+
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     String getAllShipments();
 
-    // Додати методи, які потрібні GatewayResource
-    // Наприклад:
     @GET
     @Path("/{id}")
-    String getShipment(Long id);
+    @Produces(MediaType.APPLICATION_JSON)
+    String getShipment(@PathParam("id") Long id);
 
-    @GET
-    @Path("/create/{name}")
-    String createShipment(String name);
+    // ВИПРАВЛЕНО: Був GET, став POST, щоб приймати JSON
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    String createShipment(Object shipmentData);
 
-    @GET
-    @Path("/assign/{id}")
-    String assignVehicle(Long id);
+    @PUT
+    @Path("/{id}/assign-vehicle")
+    @Produces(MediaType.APPLICATION_JSON)
+    String assignVehicle(@PathParam("id") Long id);
 }

@@ -1,20 +1,25 @@
 package ua.logistics.gateway.client;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
+import java.util.List;
 
+@RegisterRestClient(configKey = "fleet-api")
 @Path("/api/vehicles")
-@RegisterRestClient(configKey="fleet-api")
 public interface FleetClient {
+
     @GET
-    String getAllVehicles();
+    @Produces(MediaType.APPLICATION_JSON)
+    List<Object> getAllVehicles();
 
     @GET
     @Path("/{id}")
-    String getVehicle(Long id);
+    @Produces(MediaType.APPLICATION_JSON)
+    Object getVehicle(@PathParam("id") Long id);
 
     @GET
     @Path("/drivers")
-    String getAllDrivers();
+    @Produces(MediaType.APPLICATION_JSON)
+    List<Object> getAllDrivers();
 }
