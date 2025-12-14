@@ -7,7 +7,6 @@ import ua.logistics.ui.model.Shipment;
 
 import java.util.List;
 
-// configKey пов'язує цей інтерфейс з налаштуваннями в application.properties
 @RegisterRestClient(configKey = "gateway-api")
 @Path("/api")
 public interface GatewayClient {
@@ -15,4 +14,9 @@ public interface GatewayClient {
     @GET
     @Path("/shipments")
     List<Shipment> getShipments();
+
+    // Додали метод для інвойсів
+    @GET
+    @Path("/invoices")
+    List<Object> getInvoices();
 }

@@ -9,8 +9,8 @@
 <div class="container mt-5">
     <h1 class="mb-4">📦 Logistics Dashboard</h1>
 
-    <div class="card">
-        <div class="card-header">
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
             Shipments
         </div>
         <div class="card-body">
@@ -38,6 +38,43 @@
             </table>
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            Invoices
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Shipment ID</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {#for invoice in invoices}
+                <tr>
+                    <td>{invoice.id}</td>
+                    <td>{invoice.shipmentId}</td>
+                    <td>{invoice.amount}</td>
+                    <td>{invoice.currency}</td>
+                    <td>
+                        {#if invoice.status == 'PAID'}
+                        <span class="badge bg-success">{invoice.status}</span>
+                        {#else}
+                        <span class="badge bg-warning text-dark">{invoice.status}</span>
+                        {/if}
+                    </td>
+                </tr>
+                {/for}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>

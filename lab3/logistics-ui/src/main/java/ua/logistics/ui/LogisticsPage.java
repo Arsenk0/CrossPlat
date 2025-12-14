@@ -2,7 +2,7 @@ package ua.logistics.ui;
 
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
-import io.quarkus.security.Authenticated; // <--- Додати цей імпорт
+import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -12,7 +12,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import ua.logistics.ui.client.GatewayClient;
 
 @Path("/")
-@Authenticated // <--- ВАЖЛИВО: Це закриває доступ неавторизованим
+@Authenticated
 public class LogisticsPage {
 
     @Inject
@@ -25,8 +25,12 @@ public class LogisticsPage {
     @GET
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance get() {
-        // Ми додамо ім'я користувача пізніше, поки просто показуємо таблицю
+        // Отримуємо списки з Gateway
         var shipmentsList = gatewayClient.getShipments();
-        return home.data("shipments", shipmentsList);
+        var invoicesList = gatewayClient.getInvoices();
+
+        // Передаємо обидва списки в шаблон
+        return home.data("shipments", shipmentsList)
+                .data("invoices", invoicesList);
     }
 }

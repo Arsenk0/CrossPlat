@@ -2,7 +2,7 @@ package ua.logistics.gateway.resource;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType; // Не забудьте цей імпорт!
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import ua.logistics.gateway.client.*;
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Collections;
 
 @Path("/api")
-@Produces(MediaType.APPLICATION_JSON) // ВАЖЛИВО: Кажемо, що завжди віддаємо JSON
-@Consumes(MediaType.APPLICATION_JSON) // ВАЖЛИВО: Кажемо, що приймаємо JSON
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class GatewayResource {
 
     @Inject
@@ -33,7 +33,6 @@ public class GatewayResource {
         try {
             return Response.ok(shipmentsClient.getAllShipments()).build();
         } catch (Exception e) {
-            // Фейковий об'єкт при помилці
             var fallback = new ShipmentDto(999L, "System (Offline)", "Maintenance", "ERROR");
             return Response.ok(List.of(fallback)).build();
         }
@@ -45,7 +44,6 @@ public class GatewayResource {
         try {
             return Response.ok(shipmentsClient.createShipment(shipment)).build();
         } catch (Exception e) {
-            // Повертаємо JSON з помилкою, а не просто текст
             return Response.status(Response.Status.SERVICE_UNAVAILABLE)
                     .entity(new ErrorDto("Service unavailable")).build();
         }
@@ -72,7 +70,20 @@ public class GatewayResource {
         }
     }
 
-    // --- BILLING ---
+    // --- BILLING (Оновлено) ---
+
+    // 1. Додаємо метод отримання списку інвойсів
+    @GET
+    @Path("/invoices")
+    public Response getInvoices() {
+        try {
+            // Переконайся, що в BillingClient є метод getAllInvoices()
+            return Response.ok(billingClient.getAllInvoices()).build();
+        } catch (Exception e) {
+            return Response.ok(Collections.emptyList()).build();
+        }
+    }
+
     @POST
     @Path("/invoices/create-for-shipment/{id}")
     public Response createInvoice(@PathParam("id") Long id) {
