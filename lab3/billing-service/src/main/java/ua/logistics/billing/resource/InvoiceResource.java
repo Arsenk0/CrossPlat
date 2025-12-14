@@ -1,7 +1,6 @@
 package ua.logistics.billing.resource;
 
 import ua.logistics.billing.model.Invoice;
-import ua.logistics.billing.repository.InvoiceRepository;
 import ua.logistics.billing.service.BillingService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -14,29 +13,33 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class InvoiceResource {
 
-    @Inject
-    InvoiceRepository invoiceRepository;
+    // Repository видалили
 
     @Inject
     BillingService billingService;
 
     @GET
     public List<Invoice> getAllInvoices() {
-        return invoiceRepository.findAll();
+        return Invoice.listAll(); // Active Record
     }
 
     @GET
     @Path("/{id}")
     public Response getInvoice(@PathParam("id") Long id) {
-        return invoiceRepository.findById(id)
-                .map(invoice -> Response.ok(invoice).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Invoice invoice = Invoice.findById(id);
+        if (invoice == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(invoice).build();
     }
 
     @GET
     @Path("/shipment/{shipmentId}")
     public Response getInvoiceByShipment(@PathParam("shipmentId") Long shipmentId) {
-        return invoiceRepository.findByShipmentId(shipmentId)
+        // Специфічний пошук через Panache
+        // Знайти перший інвойс, де shipmentId = параметру
+        return Invoice.find("shipmentId", shipmentId)
+                .firstResultOptional()
                 .map(invoice -> Response.ok(invoice).build())
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
@@ -48,6 +51,8 @@ public class InvoiceResource {
             Invoice invoice = billingService.createInvoiceForShipment(shipmentId);
             return Response.status(Response.Status.CREATED).entity(invoice).build();
         } catch (Exception e) {
+            // Для дебагу виведемо помилку в консоль
+            e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(e.getMessage())
                     .build();

@@ -1,9 +1,12 @@
 package ua.logistics.shipments;
 
+import ua.logistics.shipments.model.Shipment;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.*;
+import java.net.URI;
+import java.util.List;
 
 @Path("/api/shipments")
 @Produces(MediaType.APPLICATION_JSON)
@@ -11,29 +14,61 @@ import java.util.*;
 public class ShipmentResource {
 
     @GET
-    public List<Map<String, Object>> getAllShipments() {
-        List<Map<String, Object>> shipments = new ArrayList<>();
-
-        Map<String, Object> s1 = new HashMap<>();
-        s1.put("id", 1L);
-        s1.put("origin", "Київ");
-        s1.put("destination", "Львів");
-        s1.put("weight", 10.0);
-        s1.put("status", "PENDING");
-        shipments.add(s1);
-
-        return shipments;
+    public List<Shipment> getAllShipments() {
+        // Active Record метод для отримання всіх записів
+        return Shipment.listAll();
     }
 
     @GET
     @Path("/{id}")
-    public Map<String, Object> getShipment(@PathParam("id") Long id) {
-        Map<String, Object> shipment = new HashMap<>();
-        shipment.put("id", id);
-        shipment.put("origin", "Київ");
-        shipment.put("destination", "Львів");
-        shipment.put("weight", 10.0);
-        shipment.put("status", "PENDING");
-        return shipment;
+    public Response getShipment(@PathParam("id") Long id) {
+        Shipment shipment = Shipment.findById(id);
+        if (shipment == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(shipment).build();
+    }
+
+    @POST
+    @Transactional // Обов'язково для запису в БД
+    public Response createShipment(Shipment shipment) {
+        // Встановлюємо час створення, якщо не передано
+        if (shipment.createdAt == null) {
+            shipment.createdAt = java.time.LocalDateTime.now();
+        }
+        // Зберігаємо в БД
+        shipment.persist();
+
+        return Response.created(URI.create("/api/shipments/" + shipment.id)).entity(shipment).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    public Response updateShipment(@PathParam("id") Long id, Shipment updatedData) {
+        Shipment entity = Shipment.findById(id);
+        if (entity == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        // Оновлюємо поля
+        entity.origin = updatedData.origin;
+        entity.destination = updatedData.destination;
+        entity.weight = updatedData.weight;
+        entity.status = updatedData.status;
+        entity.assignedVehicleId = updatedData.assignedVehicleId;
+        entity.deliveredAt = updatedData.deliveredAt;
+
+        // persist() викликати не обов'язково, об'єкт і так в managed стані всередині транзакції
+
+        return Response.ok(entity).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    public Response deleteShipment(@PathParam("id") Long id) {
+        boolean deleted = Shipment.deleteById(id);
+        return deleted ? Response.noContent().build() : Response.status(Response.Status.NOT_FOUND).build();
     }
 }

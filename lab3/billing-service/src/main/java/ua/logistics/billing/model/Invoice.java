@@ -1,20 +1,24 @@
 package ua.logistics.billing.model;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Entity;
 import java.time.LocalDateTime;
 
-public class Invoice {
-    private Long id;
-    private Long shipmentId;
-    private double amount;
-    private String currency;
-    private String status; // PENDING, PAID, CANCELLED
-    private LocalDateTime createdAt;
-    private LocalDateTime paidAt;
+@Entity
+public class Invoice extends PanacheEntity {
+    // id видаляємо, воно є в PanacheEntity
+
+    // Поля робимо public
+    public Long shipmentId;
+    public double amount;
+    public String currency;
+    public String status; // PENDING, PAID, CANCELLED
+    public LocalDateTime createdAt;
+    public LocalDateTime paidAt;
 
     public Invoice() {}
 
-    public Invoice(Long id, Long shipmentId, double amount, String currency, String status) {
-        this.id = id;
+    public Invoice(Long shipmentId, double amount, String currency, String status) {
         this.shipmentId = shipmentId;
         this.amount = amount;
         this.currency = currency;
@@ -22,25 +26,7 @@ public class Invoice {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Long getShipmentId() { return shipmentId; }
-    public void setShipmentId(Long shipmentId) { this.shipmentId = shipmentId; }
-
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
-
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getPaidAt() { return paidAt; }
-    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
+    // Гетери та сетери можна видалити, бо поля public,
+    // або залишити, якщо вони використовуються десь у тестах чи DTO мапінгу.
+    // Для Active Record вони не обов'язкові.
 }
