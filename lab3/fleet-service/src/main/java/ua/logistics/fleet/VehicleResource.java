@@ -1,46 +1,44 @@
 package ua.logistics.fleet;
 
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import java.util.*;
+import jakarta.ws.rs.core.Response;
+import ua.logistics.fleet.model.Vehicle;
+import ua.logistics.fleet.repository.VehicleRepository;
+
+import java.util.List;
 
 @Path("/api/vehicles")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class VehicleResource {
 
+    @Inject
+    VehicleRepository repository;
+
     @GET
-    public List<Map<String, Object>> getAllVehicles() {
-        List<Map<String, Object>> vehicles = new ArrayList<>();
-
-        Map<String, Object> v1 = new HashMap<>();
-        v1.put("id", 1L);
-        v1.put("registrationNumber", "AA1234BB");
-        v1.put("type", "TRUCK");
-        v1.put("capacity", 20.0);
-        v1.put("available", true);
-        vehicles.add(v1);
-
-        Map<String, Object> v2 = new HashMap<>();
-        v2.put("id", 2L);
-        v2.put("registrationNumber", "AA5678CC");
-        v2.put("type", "VAN");
-        v2.put("capacity", 5.0);
-        v2.put("available", true);
-        vehicles.add(v2);
-
-        return vehicles;
+    public List<Vehicle> getAllVehicles() {
+        return repository.listAll();
     }
 
     @GET
     @Path("/{id}")
-    public Map<String, Object> getVehicle(@PathParam("id") Long id) {
-        Map<String, Object> vehicle = new HashMap<>();
-        vehicle.put("id", id);
-        vehicle.put("registrationNumber", "AA1234BB");
-        vehicle.put("type", "TRUCK");
-        vehicle.put("capacity", 20.0);
-        vehicle.put("available", true);
-        return vehicle;
+    public Response getVehicle(@PathParam("id") Long id) {
+        Vehicle vehicle = repository.findById(id);
+        if (vehicle == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(vehicle).build();
+    }
+
+    @POST
+    @Transactional // Обов'язково для запису в БД
+    public Response createVehicle(Vehicle vehicle) {
+        // id генерується базою, тому якщо прийшов id, ми його ігноруємо або обнуляємо
+        vehicle.setId(null);
+        repository.persist(vehicle);
+        return Response.status(Response.Status.CREATED).entity(vehicle).build();
     }
 }

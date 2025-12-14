@@ -15,8 +15,12 @@ public interface GatewayClient {
     @Path("/shipments")
     List<Shipment> getShipments();
 
-    // Додали метод для інвойсів
     @GET
     @Path("/invoices")
     List<Object> getInvoices();
+
+    // --- ДОДАНО НОВИЙ МЕТОД ---
+    @GET
+    @Path("/vehicles")
+    List<Object> getVehicles();
 }

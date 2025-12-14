@@ -39,6 +39,42 @@
         </div>
     </div>
 
+    <div class="card mb-5">
+        <div class="card-header bg-warning text-dark">
+            Fleet (Vehicles)
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Registration</th>
+                    <th>Type</th>
+                    <th>Capacity (t)</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {#for vehicle in vehicles}
+                <tr>
+                    <td>{vehicle.id}</td>
+                    <td>{vehicle.registrationNumber}</td>
+                    <td>{vehicle.type}</td>
+                    <td>{vehicle.capacity}</td>
+                    <td>
+                        {#if vehicle.available}
+                        <span class="badge bg-success">Available</span>
+                        {#else}
+                        <span class="badge bg-secondary">Busy</span>
+                        {/if}
+                    </td>
+                </tr>
+                {/for}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-header bg-success text-white">
             Invoices

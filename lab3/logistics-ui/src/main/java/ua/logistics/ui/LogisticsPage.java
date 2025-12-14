@@ -29,8 +29,12 @@ public class LogisticsPage {
         var shipmentsList = gatewayClient.getShipments();
         var invoicesList = gatewayClient.getInvoices();
 
-        // Передаємо обидва списки в шаблон
+        // Отримуємо список машин (НОВЕ)
+        var vehiclesList = gatewayClient.getVehicles();
+
+        // Передаємо всі три списки в шаблон
         return home.data("shipments", shipmentsList)
-                .data("invoices", invoicesList);
+                .data("invoices", invoicesList)
+                .data("vehicles", vehiclesList); // <-- Додали сюди
     }
 }

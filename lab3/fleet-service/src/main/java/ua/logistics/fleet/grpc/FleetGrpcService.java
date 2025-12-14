@@ -5,6 +5,8 @@ import io.smallrye.mutiny.Uni;
 import ua.logistics.fleet.model.Vehicle;
 import ua.logistics.fleet.repository.VehicleRepository;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import java.util.Optional;
 
 @GrpcService
 public class FleetGrpcService implements FleetService {
@@ -13,9 +15,11 @@ public class FleetGrpcService implements FleetService {
     VehicleRepository vehicleRepository;
 
     @Override
+    @Transactional
     public Uni<VehicleAvailabilityResponse> checkVehicleAvailability(VehicleAvailabilityRequest request) {
         return Uni.createFrom().item(() -> {
-            var vehicle = vehicleRepository.findAvailableByCapacity(request.getMinCapacity());
+            // Тут використовуємо наш кастомний метод, він вже повертає Optional
+            Optional<Vehicle> vehicle = vehicleRepository.findAvailableByCapacity(request.getMinCapacity());
 
             if (vehicle.isPresent()) {
                 Vehicle v = vehicle.get();
@@ -34,9 +38,11 @@ public class FleetGrpcService implements FleetService {
     }
 
     @Override
+    @Transactional
     public Uni<ReserveVehicleResponse> reserveVehicle(ReserveVehicleRequest request) {
         return Uni.createFrom().item(() -> {
-            var vehicleOpt = vehicleRepository.findById(request.getVehicleId());
+            // ВИПРАВЛЕННЯ: використовуємо findByIdOptional замість findById
+            var vehicleOpt = vehicleRepository.findByIdOptional(request.getVehicleId());
 
             if (vehicleOpt.isEmpty()) {
                 return ReserveVehicleResponse.newBuilder()
@@ -54,8 +60,8 @@ public class FleetGrpcService implements FleetService {
                         .build();
             }
 
+            // Змінюємо статус (Hibernate автоматично збереже зміни)
             vehicle.setAvailable(false);
-            vehicleRepository.update(vehicle);
 
             return ReserveVehicleResponse.newBuilder()
                     .setSuccess(true)
