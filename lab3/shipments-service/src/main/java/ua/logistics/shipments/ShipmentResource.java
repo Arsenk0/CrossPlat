@@ -1,10 +1,14 @@
 package ua.logistics.shipments;
 
+import ua.logistics.shipments.event.ShipmentCreatedEvent; // Додано імпорт події
 import ua.logistics.shipments.model.Shipment;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.reactive.messaging.Channel; // Додано для Messaging
+import org.eclipse.microprofile.reactive.messaging.Emitter; // Додано для Messaging
+
 import java.net.URI;
 import java.util.List;
 
@@ -12,6 +16,11 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ShipmentResource {
+
+    // --- Додано: Емітер для відправки повідомлень у Kafka ---
+    @Channel("shipments-out")
+    Emitter<ShipmentCreatedEvent> shipmentEmitter;
+    // --------------------------------------------------------
 
     @GET
     public List<Shipment> getAllShipments() {
@@ -38,6 +47,16 @@ public class ShipmentResource {
         }
         // Зберігаємо в БД
         shipment.persist();
+
+        // --- Додано: Створення та відправка події в Kafka ---
+        ShipmentCreatedEvent event = new ShipmentCreatedEvent(
+                shipment.id,
+                shipment.origin,
+                shipment.destination,
+                shipment.status
+        );
+        shipmentEmitter.send(event);
+        // ----------------------------------------------------
 
         return Response.created(URI.create("/api/shipments/" + shipment.id)).entity(shipment).build();
     }
